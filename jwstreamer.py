@@ -24,22 +24,27 @@ def hdvidpro(hdl):
     return linksu
 
 
-def jwstream(linkv, subs=""):
-    logger.debug(linkv)
+def jwscrape(jwlink):
+    logger.debug(jwlink)
     logger.info("Getting page..")
-    html = requests.get(linkv).text
+    html = requests.get(jwlink).text
     if "eval(" in html:
         jsstar = html.rfind("eval(")
         jsend = html.rfind("</script>")
         js = jsbeautifier.beautify(html[jsstar:jsend])
         if (match := re.search(regvurl, js)) is not None:
-            url = match.group()
-            logger.debug(url)
-            subprocess.Popen(["vlc", url, f"--sub-file={subs}"])
+            return match.group()
+
         else:
             logger.error("Video link not found in source")
     else:
         logger.error("No eval found")
+
+
+def jwstream(jwlink, subs=""):
+    vlclink = jwscrape(jwlink)
+    logger.debug(vlclink)
+    subprocess.Popen(["vlc", vlclink, f"--sub-file={subs}"])
 
 
 if __name__ == "__main__":
